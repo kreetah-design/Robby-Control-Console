@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Robby Control Console V2.4.1</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#2d2a26;color:#d8c8a6;font-family:Georgia,serif;padding:20px}
+.dashboard{width:1280px;margin:auto;display:grid;grid-template-columns:320px 420px 420px;grid-template-rows:70px auto;gap:14px;background:#45403a;border:14px solid #26231f;border-radius:18px;padding:16px}
+.header-plate{background:#39352f;border:3px solid #8d7a55;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:bold;letter-spacing:3px}
+.system-title{grid-column:2/span 2}
+.left-column,.center-column,.right-column{display:flex;flex-direction:column;gap:14px}
+.panel{background:#34312d;border:3px solid #85714d;border-radius:20px;padding:14px}
+.panel-title{text-align:center;font-size:1.5rem;margin-bottom:12px;color:#d7c39a}
+.toggle-grid{display:grid;grid-template-columns:120px 120px;justify-content:center;gap:8px}
+.hot-toggle-btn{height:72px;background:url('Button-Narrow-OFF.png') center/contain no-repeat;position:relative;cursor:pointer}
+.hot-toggle-btn.active{background-image:url('Button-Narrow-ON.png')}
+.btn-label{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#222;font-weight:bold;padding-top:8px}
+.audio-panel{background:#d8c8a6;color:#222;border:2px inset #777;padding:10px;height:430px}
+.tracklist{height:260px;overflow-y:auto;border:1px inset #666;background:#efe3c5;padding:4px;font-family:monospace}
+.robot-panel{flex:1;min-height:520px;border:3px solid #85714d;border-radius:20px;background:radial-gradient(ellipse at center,#555049 0%,#3c3731 40%,#1f1c19 100%);display:flex;align-items:center;justify-content:center;padding-top:20px}
+.robot-img{max-width:98%;max-height:98%;transform:scale(1.12)}
+.speaker-panel,.serial-plate{background:#2c2925;border:3px solid #85714d;border-radius:12px;padding:12px;text-align:center}
+.grill-slot{height:6px;background:#000;border-radius:10px;margin:7px 0}
+.knobs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.knob-control{text-align:center}
+.knob-label{margin-bottom:4px}
+
+.center-indicator{
+ display:flex;
+ flex-direction:column;
+ align-items:center;
+ cursor:pointer;
+ font-size:.8rem;
+ margin-bottom:5px;
+ color:#ffe08a;
+ font-weight:bold;
+ text-shadow:0 0 6px rgba(255,224,138,.5);
+ transition:.2s;
+ user-select:none;
+}
+.center-indicator:hover{
+ color:#fff8c6;
+ transform:scale(1.08);
+}
+.tick-mark{width:2px;height:14px;background:#d8c8a6}
+
+.knob{width:100px;height:100px;margin:auto;background-image:url('Knob Without Line.png');background-size:cover;border-radius:50%;position:relative;cursor:grab;transition:transform .05s linear}
+.knob::after{content:'';position:absolute;top:10px;left:48px;width:4px;height:25px;background:red;border-radius:2px}
+
+.readout{margin:8px auto 0;width:70px;background:#000;color:#0f0;padding:6px;border-radius:4px;font-family:monospace;text-align:center}
+.bottom-panel{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.meter-column{display:flex;flex-direction:column;align-items:center}
+.meter-box img{width:100%;display:block;margin-bottom:20px}
+.switch-wrap{height:280px;display:flex;justify-content:center;align-items:flex-start}
+.power-switch{width:95px}
+.connect-switch{width:165px}
+</style>
+</head>
+<body>
+<div class="dashboard">
+<div class="header-plate">ROBBIE</div>
+<div class="header-plate system-title">SYSTEM CONTROL V2.4.1</div>
+<div class="left-column">
+<div class="panel"><div class="panel-title">HOT TOGGLES</div><div class="toggle-grid" id="hotToggles"></div></div>
+<div class="panel"><div class="panel-title">AUDIO REPERTOIRE</div><div class="audio-panel"><input placeholder="Search Tracks" style="width:100%;padding:4px"><div class="tracklist" id="trackList"></div></div></div>
+</div>
+<div class="center-column">
+<div class="robot-panel"><img class="robot-img" src="Robby-NO-background.png"></div>
+<div class="speaker-panel"><div class="grill-slot"></div><div class="grill-slot"></div><div class="grill-slot"></div><div class="grill-slot"></div><div class="grill-slot"></div><div class="grill-slot"></div><div class="grill-slot"></div><div class="grill-slot"></div><div class="grill-slot"></div><div class="grill-slot"></div></div>
+<div class="serial-plate">CLASS M-3<br>SERIAL NO. 1956-R1</div>
+</div>
+<div class="right-column">
+<div class="panel"><div class="panel-title">CENTRAL CONTROLS</div><div class="knobs-grid" id="knobGrid"></div></div>
+<div class="bottom-panel">
+<div class="meter-column"><div class="meter-box"><img src="Voltage-NO-Needle.png"></div><div class="switch-wrap"><img id="powerSwitch" class="power-switch" src="Power-OFF.png"></div></div>
+<div class="meter-column"><div class="meter-box"><img src="Signal-NO-Needle.png"></div><div class="switch-wrap"><img id="connectSwitch" class="connect-switch" src="Connect-OFF.png"></div></div>
+</div></div></div>
+<script>
+["Robby","English","Admit","Oil Job","Analyzing","Radiation","Beams","Fusel Oil"].forEach(name=>{
+ let b=document.createElement('div');b.className='hot-toggle-btn';
+ b.innerHTML='<div class="btn-label">'+name+'</div>';
+ b.onclick=()=>b.classList.toggle('active');
+ hotToggles.appendChild(b);
+});
+for(let i=1;i<=100;i++){let d=document.createElement('div');d.textContent=String(i).padStart(3,'0')+' Track';trackList.appendChild(d);}
+const names=["TORSO","HEAD","ARMS","R-ARM","L-ARM","R-WRIST"];
+names.forEach((name,i)=>{
+ knobGrid.innerHTML+=`<div class="knob-control"><div>${name}</div><div class="center-indicator" onclick="resetKnob(${i+1})">CENTER<div class="tick-mark"></div></div><div class="knob" id="k${i+1}"></div><div class="readout" id="r${i+1}">0°</div></div>`;
+});
+const knobAngles=[0,0,0,0,0,0];
+function resetKnob(id){knobAngles[id-1]=0;document.getElementById('k'+id).style.transform='rotate(0deg)';document.getElementById('r'+id).innerText='0°';}
+document.querySelectorAll('.knob').forEach((knob,i)=>{
+ let drag=false;
+ const move=e=>{
+  if(!drag)return;
+  const r=knob.getBoundingClientRect();
+  const cx=r.left+r.width/2, cy=r.top+r.height/2;
+  let a=Math.atan2(e.clientY-cy,e.clientX-cx)*(180/Math.PI)+90;
+  if(a>180)a-=360;if(a<-180)a+=360;
+  let cur=knobAngles[i], na=Math.max(-135,Math.min(135,a));
+  if(Math.abs(na-cur)<100){knobAngles[i]=na;knob.style.transform=`rotate(${na}deg)`;document.getElementById('r'+(i+1)).innerText=Math.round(na)+'°';}
+ };
+ knob.addEventListener('mousedown',()=>drag=true);
+ window.addEventListener('mouseup',()=>drag=false);
+ window.addEventListener('mousemove',move);
+});
+let p=false,c=false;
+powerSwitch.onclick=()=>{p=!p;powerSwitch.src=p?'Power-ON.png':'Power-OFF.png';}
+connectSwitch.onclick=()=>{c=!c;connectSwitch.src=c?'Connect-ON.png':'Connect-OFF.png';}
+</script></body></html>
